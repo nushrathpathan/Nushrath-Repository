@@ -1,0 +1,4 @@
+# create server list in "C:\Temp\serverlist.txt"
+# output file will be C:\Temp\Spacelist.csv
+$results = gwmi win32_logicaldisk -Filter "DeviceID = 'C:'" | select DriveType, VolumeName, Name, @{n=’Size (Gb)’ ;e={“{0:n2}” -f ($_.size/1gb)}},@{n=’FreeSpace (Gb)’;e={“{0:n2}” -f ($_.freespace/1gb)}}, @{n=’PercentFree’;e={“{0:n2}” -f ($_.freespace/$_.size*100)}}
+Invoke-Command -ComputerName (get-content C:\Temp\serverlist.txt) -ScriptBlock { gwmi win32_logicaldisk -Filter "DriveType = '3'" | select DriveType, VolumeName, Name, @{n=’Size (Gb)’ ;e={“{0:n2}” -f ($_.size/1gb)}},@{n=’FreeSpace (Gb)’;e={“{0:n2}” -f ($_.freespace/1gb)}}, @{n=’PercentFree’;e={“{0:n2}” -f ($_.freespace/$_.size*100)}} } | Select-Object PSComputerName, Name, Size*, FreeSpace*, PercentFree | Export-Csv -Path C:\Temp\Spacelist.csv
